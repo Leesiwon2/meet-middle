@@ -1,0 +1,12 @@
+
+# <type>(<scope>): <제목>        ← 72자 이내, 끝 마침표 없음
+#
+# type: feat fix docs test refactor perf style build ci chore revert
+# scope: be fe db infra ci room participant recommend place auth (자명하면 생략)
+#
+# [본문] 무엇을, 왜 (선택)
+# fix 는 재현 테스트 동반. 못 두면 본문에 "시험-면제: <사유>"
+# build 로 버전을 바꾸면 docs/dev/TECH-STACK.md 도 같은 커밋에서
+#
+# [꼬리] Refs #이슈번호 (선택)
+# 정본: docs/CONVENTION.md
