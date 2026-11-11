@@ -1,7 +1,8 @@
 # 중간지점 (가칭: meet-middle) — 기획/설계 문서
 
-> 작성일: 2026-11-11 · 상태: 초안 v0.1
-> 스택: React (Vite + TypeScript) / Spring Boot 3 (Java 21) / PostgreSQL / Redis
+> 작성일: 2026-11-11 · 상태: 초안 v0.2 / 2026-11-11
+> 스택: React 19 (Vite 8 + TypeScript 6) / Spring Boot 4.1 (Java 21) / PostgreSQL 18 / Redis 8
+> 정확한 버전과 선택 이유는 [`docs/dev/TECH-STACK.md`](../dev/TECH-STACK.md) 가 정본이다. 이 문서에는 버전을 복사하지 않는다.
 
 ---
 
@@ -241,8 +242,10 @@
    └── (후속) SSE 브로드캐스트
 ```
 
+> 폴더 구조와 코딩 규칙은 [`docs/dev/BACKEND-GUIDE.md`](../dev/BACKEND-GUIDE.md), [`docs/dev/FRONTEND-GUIDE.md`](../dev/FRONTEND-GUIDE.md) 가 정본이다.
+
 ### 7.1 프론트엔드 (React)
-- Vite + TypeScript, React Router, TanStack Query(폴링·캐시), Zustand(가벼운 전역 상태)
+- Vite + TypeScript strict, React Router, TanStack Query(폴링·캐시), Zustand(가벼운 전역 상태), orval(OpenAPI → 타입·훅 생성)
 - 스타일: Tailwind CSS · 모바일 우선 (단톡방 링크 → 대부분 모바일 진입)
 - 라우트
   - `/` 랜딩 · `/login` · `/signup` · `/me` 프로필
@@ -252,7 +255,7 @@
   - `/r/:code/result` 결과 S7 · `/r/:code/places/:hubId` 주변 추천 S8
 
 ### 7.2 백엔드 (Spring Boot)
-- Java 21, Spring Boot 3.x, Spring Web, Spring Security, Spring Data JPA, Flyway, Redis(Lettuce)
+- Java 21, Spring Boot 4.1, Spring Web MVC, Spring Security, Spring Data JPA, Flyway, Redis(Lettuce), springdoc-openapi
 - 패키지 구조 (도메인 중심)
   ```
   com.meetmiddle
@@ -449,8 +452,10 @@ CREATE TABLE recommendation (
 | GET | `/hubs/{hubId}/places?category=FOOD\|BAR\|CAFE&page=1` | 참여자 | 카카오 로컬 프록시(키 은닉) + Redis 캐시 1일 |
 
 ### 10.6 공통 오류 형식
+RFC 9457 ProblemDetail + `code` 확장 필드. 상세 계약은 [`docs/dev/API-ERROR-CONTRACT.md`](../dev/API-ERROR-CONTRACT.md) 가 정본이다.
 ```json
-{ "code": "NICKNAME_TAKEN", "message": "이 방에 이미 같은 닉네임이 있어요." }
+{ "type": "about:blank", "status": 409, "title": "Conflict",
+  "code": "NICKNAME_TAKEN", "detail": "이 방에 이미 같은 닉네임이 있어요.", "traceId": "…" }
 ```
 주요 코드: `ROOM_NOT_FOUND`(404), `ROOM_EXPIRED`(410), `ROOM_FULL`(409), `NICKNAME_TAKEN`(409), `NOT_HOST`(403), `ADDRESS_NOT_FOUND`(422), `NOT_ENOUGH_PARTICIPANTS`(422), `TRANSIT_API_UNAVAILABLE`(503)
 
