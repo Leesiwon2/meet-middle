@@ -1,0 +1,11 @@
+node_modules/
+dist/
+build/
+.gradle/
+.idea/
+*.iml
+.env
+.env.*
+!.env.example
+application-local.yml
+.DS_Store
