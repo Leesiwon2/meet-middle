@@ -1,6 +1,6 @@
 # 중간지점 (가칭: meet-middle) — 기획/설계 문서
 
-> 작성일: 2026-11-11 · 상태: 초안 v0.2 / 2026-11-11
+> 작성일: 2026-11-11 · 상태: 초안 v0.3 / 2026-11-11 (참여자별 출발지 선택 추가)
 > 스택: React 19 (Vite 8 + TypeScript 6) / Spring Boot 4.1 (Java 21) / PostgreSQL 18 / Redis 8
 > 정확한 버전과 선택 이유는 [`docs/dev/TECH-STACK.md`](../dev/TECH-STACK.md) 가 정본이다. 이 문서에는 버전을 복사하지 않는다.
 
@@ -14,9 +14,10 @@
 
 ### 1.2 해결
 1. 한 명이 방을 만들고 **링크를 공유**한다.
-2. 링크로 들어온 사람은 **로그인 또는 비회원(닉네임)** 으로 참여해 **집·회사 주소**를 입력한다.
+2. 링크로 들어온 사람은 **로그인 또는 비회원(닉네임)** 으로 참여해 **집·회사 주소**(필요하면 이번 모임용 **기타 주소**)를 입력하고, **이번 모임의 출발지**를 고른다.
 3. 서비스가 **대중교통 소요시간 기준**으로 가장 공평한 만남 장소를 추천한다.
-   - **회사 출발(평일 퇴근 후)** / **집 출발(주말)** 두 시나리오를 모두 계산해 비교해서 보여준다.
+   - **회사 출발(평일 퇴근 후)** / **집 출발(주말)** / **각자 선택한 출발지(이번 모임)** 세 시나리오를 계산해 비교해서 보여준다.
+   - 추천 장소마다 **참여자 각자의 출발지에서 걸리는 시간**을 표시한다.
 4. 선택한 장소 주변의 **맛집·술집**을 추천한다.
 
 ### 1.3 목표 / 비목표 (MVP 기준)
@@ -24,7 +25,7 @@
 |---|---|
 | 링크 하나로 2~10명이 참여 | 일정(날짜) 조율 |
 | 대중교통 기준 공평한 장소 Top 3 | 자가용·도보 기준 계산 |
-| 집/회사 시나리오 비교 | 실시간 도착 정보 반영 |
+| 집/회사/각자 선택 시나리오 비교 | 실시간 도착 정보 반영 |
 | 주변 맛집·술집 목록 | 자체 리뷰·평점 시스템, 예약 |
 | 수도권 지원 | 전국 지원 (후보 역 DB 확장으로 대응) |
 
@@ -42,13 +43,14 @@
 
 ### 2.2 대표 시나리오
 1. 지원(회원)이 "11월 송년회" 방 생성 → 링크 `https://.../r/K7Q2MX` 를 단톡방에 공유
-2. 친구 A(비회원)가 링크 클릭 → 닉네임 "민수" 입력 → 중복 검사 통과 → 집/회사 주소 입력
-3. 친구 B(회원)가 링크 클릭 → 로그인 → 프로필 주소 자동 입력 → 확인
-4. 참여자들이 대기 화면에서 "4명 중 3명 입력 완료" 를 실시간으로 확인
-5. 방장이 **[중간지점 찾기]** → 결과 화면
-   - 탭: **퇴근 후 (회사 출발)** / **주말 (집 출발)**
-   - 각 탭에 추천 장소 Top 3 + 참여자별 소요시간
-6. "사당역" 선택 → 주변 맛집 / 술집 / 카페 목록 → 카카오맵 링크로 이동
+2. 친구 A(비회원)가 링크 클릭 → 닉네임 "민수" 입력 → 중복 검사 통과 → 집/회사 주소 입력 → 출발지 "회사" 선택
+3. 친구 B(회원)가 링크 클릭 → 로그인 → 프로필 주소 자동 입력 → 그날 재택이라 출발지 "집" 선택
+4. 친구 C(비회원)는 그날 외근이라 기타 주소에 "판교 외근지" 입력 → 출발지 "기타" 선택
+5. 참여자들이 대기 화면에서 "4명 중 3명 입력 완료" 와 각자의 출발지(집/회사/기타)를 실시간으로 확인
+6. 방장이 **[중간지점 찾기]** → 결과 화면
+   - 탭: **이번 모임 (각자 출발지)** / **퇴근 후 (회사 출발)** / **주말 (집 출발)**
+   - 각 탭에 추천 장소 Top 3 + 참여자별 출발지·소요시간
+7. "사당역" 선택 → 주변 맛집 / 술집 / 카페 목록 → 카카오맵 링크로 이동
 
 ---
 
@@ -83,17 +85,27 @@
 
 ### 3.4 주소 입력
 - `[M]` 집 주소 / 회사 주소 각각 입력 (주소 검색 자동완성 → 좌표 변환)
-- `[M]` 둘 중 하나만 입력도 허용
+- `[M]` 집·회사·기타 중 하나 이상 입력하면 "입력 완료"(`ready`). 집·회사 중 하나만 입력도 허용
   - 회사 주소 없음 → 회사 시나리오에서 집 주소로 대체 (결과에 "집 기준" 배지 표시)
   - 집 주소 없음 → 반대로 대체
 - `[M]` 다른 참여자에게는 **동 단위**까지만 노출 (예: "관악구 봉천동") — 정확한 주소 비공개
+- `[M]` **기타 주소**: 이번 모임에만 쓰는 출발지 1개 (학교, 외근지, 본가 등). 방 참여 정보에만 저장하고 회원 프로필에는 저장하지 않는다
 - `[L]` "가까운 역" 으로 대충 입력하는 옵션 (주소 공개가 부담스러운 사용자용)
+
+### 3.4a 출발지 선택
+- `[M]` 참여자는 이번 모임의 출발지를 **집 / 회사 / 기타** 중 하나로 고른다 (입력한 주소 중에서만 선택 가능)
+- `[M]` 주소 저장 시 함께 저장하고, 결과가 나온 뒤에도 바꿀 수 있다 (바꾸면 "재계산 필요")
+- `[M]` 고르지 않으면 **회사 → 집 → 기타** 순으로 입력된 첫 주소를 쓰고, 결과에 "기본값" 표시
+- `[M]` 대기실에서 각 참여자의 출발지 종류(집/회사/기타)와 동 단위 지역을 보여준다
 
 ### 3.5 중간지점 추천
 - `[M]` 방장이 계산 실행 (최소 2명 주소 입력 시 활성화)
-- `[M]` 회사/집 두 시나리오 계산 → 각 Top 3 장소
-- `[M]` 각 장소: 역 이름, 참여자별 소요시간·환승 횟수, 최대/평균 시간
-- `[M]` 시나리오 비교 요약: "퇴근 후엔 **강남**, 주말엔 **사당**이 가장 공평해요"
+- `[M]` 각자 선택 / 회사 / 집 세 시나리오 계산 → 각 Top 3 장소 (§5.4)
+- `[M]` 각 장소: 역 이름, 최대/평균 시간, 그리고 **참여자 전원의 소요시간 목록**
+  - 참여자마다 `닉네임 · 출발지 종류(집/회사/기타) · 동 단위 지역 · 소요시간(분) · 환승 횟수`
+  - 대체된 출발지는 배지로 표시 ("집 기준", "기본값")
+  - 본인 행은 강조하고 맨 위에 둔다. 가장 오래 걸리는 사람의 시간을 강조한다
+- `[M]` 시나리오 비교 요약: "이번 모임은 **교대**, 퇴근 후엔 **강남**, 주말엔 **사당**이 가장 공평해요"
 - `[L]` 장소 투표, 출발 시각 지정(심야 시간 반영)
 
 ### 3.6 맛집·술집 추천
@@ -118,24 +130,29 @@
 │ (로그인 필요) │    │ [만들기]      │     │ → S5로 이동   │
 └──────────────┘    └──────────────┘     └──────────────┘
 
-[S4] 링크로 입장 (/r/{code})        [S5] 주소 입력
-┌───────────────────────┐          ┌───────────────────────┐
-│ "11월 송년회"에 초대됨  │          │ 🏠 집   [주소 검색 🔍] │
-│ [로그인하고 참여]       │    →     │ 🏢 회사 [주소 검색 🔍] │
-│ ── 또는 ──             │          │ ※ 다른 사람에겐 동까지만│
-│ 닉네임 [민수    ] ✓    │          │ [저장]                 │
-│ [비회원으로 참여]       │          └───────────────────────┘
-└───────────────────────┘
+[S4] 링크로 입장 (/r/{code})        [S5] 주소 입력 · 출발지 선택
+┌───────────────────────┐          ┌─────────────────────────┐
+│ "11월 송년회"에 초대됨  │          │ 🏠 집   [주소 검색 🔍]   │
+│ [로그인하고 참여]       │    →     │ 🏢 회사 [주소 검색 🔍]   │
+│ ── 또는 ──             │          │ 📍 기타 [주소 검색 🔍]   │
+│ 닉네임 [민수    ] ✓    │          │   (이번 모임만, 선택)    │
+│ [비회원으로 참여]       │          │ 이번 모임 출발지:        │
+└───────────────────────┘          │ (●)회사 ( )집 ( )기타    │
+                                   │ ※ 다른 사람에겐 동까지만 │
+                                   │ [저장]                   │
+                                   └─────────────────────────┘
 
 [S6] 대기실                         [S7] 결과
-┌───────────────────────┐          ┌───────────────────────────┐
-│ 참여자 4명 · 3명 입력 ✓ │          │ [퇴근 후 회사출발] [주말 집출발]│
-│ ✓ 지원(방장) 관악구     │          │ 1. 사당역  최대 32분 평균 25분 │
-│ ✓ 민수 성동구           │    →     │    지원 18 · 민수 32 · …     │
-│ ✓ 영희 분당구           │          │ 2. 교대역  최대 35분 …       │
-│ … 철수 (입력 중)        │          │ 3. 강남역  …                 │
-│ [중간지점 찾기] (방장)   │          │ [지도 보기]  [이 장소 선택]   │
-└───────────────────────┘          └───────────────────────────┘
+┌─────────────────────────┐        ┌────────────────────────────────┐
+│ 참여자 4명 · 3명 입력 ✓   │        │ [이번 모임] [퇴근 후] [주말]     │
+│ ✓ 지원(방장) 🏢 관악구    │        │ 1. 교대역  최대 32분 · 평균 25분 │
+│ ✓ 민수 🏢 성동구          │   →    │   ▶ 나(지원) 🏢 관악구  18분 · 0환승│
+│ ✓ 영희 🏠 분당구          │        │     민수 🏢 성동구 ★32분 · 1환승 │
+│ … 철수 (입력 중)          │        │     영희 🏠 분당구  27분 · 1환승 │
+│ [중간지점 찾기] (방장)     │        │ 2. 사당역  최대 35분 …          │
+└─────────────────────────┘        │ [지도 보기]  [이 장소 선택]      │
+                                   └────────────────────────────────┘
+  🏠 집 · 🏢 회사 · 📍 기타 · ★ 가장 오래 걸리는 사람
 
 [S8] 장소 주변 추천
 ┌───────────────────────┐
@@ -164,7 +181,7 @@
 ### 5.3 계산 절차 (시나리오별로 동일하게 수행)
 
 ```
-입력: 참여자 P = {p1..pn}, 각 출발 좌표 o_i (시나리오에 따라 집 or 회사)
+입력: 참여자 P = {p1..pn}, 각 출발 좌표 o_i (시나리오에 따라 집 / 회사 / 본인 선택, §5.4)
 1) 후보 축소
    - 중심 c = 출발 좌표들의 평균 (참고용)
    - hub 중 c 에서 가까운 순 + 참여자 각자에서 "너무 멀지 않은" hub 로 K=12 개 선정
@@ -183,11 +200,16 @@
 - 가중치(0.5/0.3/0.2, 환승 3분)는 `application.yml` 설정값 → 실제 사용 데이터로 튜닝
 - 경로 조회 실패(경로 없음/심야)한 참여자–hub 조합은 해당 hub 제외
 
-### 5.4 두 시나리오 비교
-- 시나리오 A **회사 출발**: o_i = 회사 (없으면 집)
-- 시나리오 B **집 출발**: o_i = 집 (없으면 회사)
-- **두 시나리오의 출발지가 모든 참여자에 대해 같으면** (모두 한쪽만 입력) 한 번만 계산하고 탭 하나만 표시
-- 결과 요약 문구: 두 시나리오 1위가 같으면 "언제 만나도 **사당**이 가장 좋아요", 다르면 각각 표시
+### 5.4 세 시나리오 비교
+| 시나리오 | 코드 | 출발 좌표 o_i | 탭 순서 |
+|---|---|---|---|
+| **이번 모임 (각자 선택)** | `CHOSEN` | 본인이 고른 출발지 (미선택 시 회사 → 집 → 기타 순 첫 주소, "기본값" 표시) | 1 (기본 탭) |
+| **회사 출발** | `WORK` | 회사 (없으면 집, "집 기준" 표시) | 2 |
+| **집 출발** | `HOME` | 집 (없으면 회사, "회사 기준" 표시) | 3 |
+
+- 기타 주소는 `CHOSEN` 시나리오에서만 쓴다. `WORK`/`HOME` 에서 집·회사가 모두 없는 참여자(기타만 입력)는 기타 주소로 대체하고 "기타 기준" 표시
+- **출발 좌표 집합이 같은 시나리오는 한 번만 계산**한다. 예: 모두 회사를 골랐으면 `CHOSEN` = `WORK` → 탭을 합쳐 "이번 모임 (= 퇴근 후)" 로 표시. 모두 한쪽 주소만 입력했으면 탭 하나
+- 결과 요약 문구: 1위가 모두 같으면 "언제 만나도 **사당**이 가장 좋아요", 다르면 시나리오별로 표시
 
 ### 5.5 캐싱 & 호출량 최적화
 - 출발 좌표를 **약 200m 격자로 스냅** → `(grid_cell, hub_id)` 키로 Redis 캐시, TTL 7일
@@ -196,8 +218,9 @@
 - 외부 API 동시 호출은 스레드풀(동시성 5) + 타임아웃 3초 + 재시도 1회
 
 ### 5.6 호출량 추정
-- 최악: 10명 × 12 hub × 2 시나리오 = **240 호출 / 계산 1회**
-- 평균(5명, 캐시 적중 40%): 5 × 12 × 2 × 0.6 ≈ **72 호출**
+- 최악: 10명 × 12 hub × 3 시나리오 = **360 호출 / 계산 1회**
+  - 실제로는 더 적다: `CHOSEN` 의 출발 좌표는 대부분 집·회사 좌표와 같아, 후보 hub 가 겹치면 같은 `(grid_cell, hub_id)` 캐시를 쓴다. 새로 생기는 호출은 기타 주소와 `CHOSEN` 에서만 뽑힌 hub 분
+- 평균(5명, 캐시 적중 40%): 5 × 12 × 3 × 0.6 ≈ **108 호출** (시나리오 간 캐시 공유를 빼고 잡은 상한)
 - → 외부 API 일일 한도와 비교해 방 수 상한 산정 필요 (§6 확인 필요)
 - **후속 최적화(Phase 2)**: 수도권 전 역(약 600개) × hub(100개) **역간 소요시간 행렬을 사전 계산**해 DB에 저장하고,
   실시간으로는 "출발지 → 가까운 역 2~3곳 접근시간(도보/버스)"만 조회 → 계산당 호출 수를 n × 3 수준으로 축소
@@ -313,10 +336,14 @@ CREATE TABLE participant (
   home_lat DOUBLE PRECISION,  home_lng DOUBLE PRECISION,
   work_address  VARCHAR(255), work_region VARCHAR(50),
   work_lat DOUBLE PRECISION,  work_lng DOUBLE PRECISION,
+  other_address VARCHAR(255), other_region VARCHAR(50),          -- 기타: 이번 모임용, 프로필에 없음
+  other_lat DOUBLE PRECISION, other_lng DOUBLE PRECISION,
+  origin_choice VARCHAR(8),                                      -- HOME | WORK | OTHER, NULL = 미선택(기본값 규칙)
   joined_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
   CONSTRAINT uq_room_nickname UNIQUE (room_id, nickname_normalized),   -- ★ 방 단위 닉네임 중복 방지
   CONSTRAINT uq_room_member   UNIQUE (room_id, member_id),             -- 회원은 방당 1회 참여
+  CONSTRAINT ck_origin_choice CHECK (origin_choice IN ('HOME','WORK','OTHER')),
   CONSTRAINT ck_identity CHECK (
     (member_id IS NOT NULL AND guest_token_hash IS NULL) OR
     (member_id IS NULL AND guest_token_hash IS NOT NULL))
@@ -336,20 +363,21 @@ CREATE TABLE hub (
 CREATE TABLE recommendation (
   id           BIGSERIAL PRIMARY KEY,
   room_id      BIGINT      NOT NULL REFERENCES room(id) ON DELETE CASCADE,
-  scenario     VARCHAR(8)  NOT NULL,          -- WORK | HOME
+  scenario     VARCHAR(8)  NOT NULL,          -- CHOSEN | WORK | HOME
   rank         SMALLINT    NOT NULL,          -- 1..3
   hub_id       BIGINT      NOT NULL REFERENCES hub(id),
   score        NUMERIC(8,2) NOT NULL,
   max_minutes  SMALLINT    NOT NULL,
   avg_minutes  NUMERIC(5,1) NOT NULL,
-  detail       JSONB       NOT NULL,          -- [{participantId, minutes, transfers, originType}]
+  detail       JSONB       NOT NULL,          -- [{participantId, minutes, transfers, originType, originFallback}]
   computed_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
   UNIQUE (room_id, scenario, rank)
 );
 ```
 
 - 계산 결과는 방별로 덮어쓰기(재계산 시 기존 행 삭제 후 삽입)
-- `detail.originType`: 회사 시나리오인데 집으로 대체된 경우 `HOME` → UI 배지
+- `detail.originType`: 실제로 쓴 출발지 `HOME | WORK | OTHER`. `originFallback`: 의도와 다른 출발지로 대체됐거나(예: 회사 시나리오인데 집) `CHOSEN` 에서 미선택이라 기본값을 쓴 경우 `true` → UI 배지
+- `detail` 에는 지역(region)도 저장하지 않는다. 응답 시 participant 의 현재 region 을 붙인다 (참여자가 주소를 바꾸면 결과는 `stale`)
 
 ---
 
@@ -376,7 +404,8 @@ CREATE TABLE recommendation (
 ### 9.4 개인정보
 - 정확한 주소/좌표는 **본인과 서버만** 접근, API 응답에서 다른 참여자는 `region`(동 단위)만
 - 계산 결과 `detail`에도 좌표 저장 안 함 (분 단위 시간만)
-- 방 만료 30일 후 participant 주소·좌표 컬럼 NULL 처리 배치
+- 방 만료 30일 후 participant 주소·좌표 컬럼(집·회사·기타 모두) NULL 처리 배치
+- 다른 참여자에게 보이는 출발지 정보는 **종류(집/회사/기타)와 동 단위 지역**까지만
 - 회원 프로필 주소는 회원 탈퇴 시 즉시 삭제
 - 가입/참여 시 위치정보 수집·이용 동의 문구 (위치정보법 검토 필요)
 
@@ -404,14 +433,14 @@ CREATE TABLE recommendation (
 |---|---|---|---|
 | POST | `/rooms` | 회원 | `{title, memo}` → `{code, shareUrl}` · 방장 자동 참여 |
 | GET | `/rooms/{code}` | 공개 | 외부인: `{title, participantCount, status}` / 참여자: + `me`, `isHost` |
-| GET | `/rooms/{code}/participants` | 참여자 | `[{id, nickname, isHost, homeRegion, workRegion, ready}]` |
+| GET | `/rooms/{code}/participants` | 참여자 | `[{id, nickname, isHost, homeRegion, workRegion, otherRegion, originChoice, ready}]` |
 
 ### 10.3 참여
 | Method | Path | 권한 | 설명 |
 |---|---|---|---|
 | GET | `/rooms/{code}/nicknames/check?value=민수` | 공개 | `{available: true}` |
 | POST | `/rooms/{code}/participants` | 회원 or 비회원 | `{nickname}` → 비회원이면 `pt_{code}` 쿠키 발급. 중복 시 **409 `NICKNAME_TAKEN`** |
-| PUT | `/rooms/{code}/participants/me/addresses` | 참여자 본인 | `{home:{address}, work:{address}}` → 서버에서 지오코딩 |
+| PUT | `/rooms/{code}/participants/me/addresses` | 참여자 본인 | `{home:{address}, work:{address}, other:{address}, originChoice}` → 서버에서 지오코딩. 고른 출발지의 주소가 비어 있으면 **422 `ORIGIN_ADDRESS_MISSING`** |
 | DELETE | `/rooms/{code}/participants/me` | 참여자 본인 | 방 나가기 |
 
 ### 10.4 추천
@@ -425,26 +454,32 @@ CREATE TABLE recommendation (
 {
   "computedAt": "2026-11-11T19:00:00+09:00",
   "stale": false,
-  "summary": "퇴근 후엔 강남역, 주말엔 사당역이 가장 공평해요",
+  "summary": "이번 모임은 교대역, 퇴근 후엔 강남역, 주말엔 사당역이 가장 공평해요",
   "scenarios": [
     {
-      "type": "WORK",
+      "type": "CHOSEN",
+      "sameAs": null,
       "results": [
         {
           "rank": 1,
-          "hub": {"id": 3, "name": "강남역", "lat": 37.4979, "lng": 127.0276},
-          "maxMinutes": 31, "avgMinutes": 24.5,
+          "hub": {"id": 7, "name": "교대역", "lat": 37.4934, "lng": 127.0142},
+          "maxMinutes": 32, "avgMinutes": 25.7,
           "participants": [
-            {"id": 11, "nickname": "지원", "minutes": 18, "transfers": 0, "originType": "WORK"},
-            {"id": 12, "nickname": "민수", "minutes": 31, "transfers": 1, "originType": "HOME"}
+            {"id": 11, "nickname": "지원", "me": true,  "originType": "WORK", "originFallback": false, "originRegion": "관악구 봉천동", "minutes": 18, "transfers": 0, "slowest": false},
+            {"id": 12, "nickname": "민수", "me": false, "originType": "WORK", "originFallback": false, "originRegion": "성동구 성수동", "minutes": 32, "transfers": 1, "slowest": true},
+            {"id": 13, "nickname": "영희", "me": false, "originType": "HOME", "originFallback": false, "originRegion": "분당구 정자동", "minutes": 27, "transfers": 1, "slowest": false}
           ]
         }
       ]
     },
-    { "type": "HOME", "results": [ ... ] }
+    { "type": "WORK", "sameAs": null, "results": [ ... ] },
+    { "type": "HOME", "sameAs": null, "results": [ ... ] }
   ]
 }
 ```
+
+- `participants` 는 본인(`me`) 먼저, 나머지는 소요시간 내림차순. 좌표·정확한 주소는 넣지 않는다
+- `sameAs`: 출발 좌표 집합이 다른 시나리오와 같아 계산을 합친 경우 그 시나리오 코드 (예: `CHOSEN` 의 `sameAs: "WORK"`). 이때 `results` 는 비우고 프론트가 탭을 합친다
 
 ### 10.5 주변 장소
 | Method | Path | 권한 | 설명 |
@@ -457,7 +492,7 @@ RFC 9457 ProblemDetail + `code` 확장 필드. 상세 계약은 [`docs/dev/API-E
 { "type": "about:blank", "status": 409, "title": "Conflict",
   "code": "NICKNAME_TAKEN", "detail": "이 방에 이미 같은 닉네임이 있어요.", "traceId": "…" }
 ```
-주요 코드: `ROOM_NOT_FOUND`(404), `ROOM_EXPIRED`(410), `ROOM_FULL`(409), `NICKNAME_TAKEN`(409), `NOT_HOST`(403), `ADDRESS_NOT_FOUND`(422), `NOT_ENOUGH_PARTICIPANTS`(422), `TRANSIT_API_UNAVAILABLE`(503)
+주요 코드: `ROOM_NOT_FOUND`(404), `ROOM_EXPIRED`(410), `ROOM_FULL`(409), `NICKNAME_TAKEN`(409), `NOT_HOST`(403), `ADDRESS_NOT_FOUND`(422), `ORIGIN_ADDRESS_MISSING`(422), `NOT_ENOUGH_PARTICIPANTS`(422), `TRANSIT_API_UNAVAILABLE`(503)
 
 ---
 
@@ -465,7 +500,7 @@ RFC 9457 ProblemDetail + `code` 확장 필드. 상세 계약은 [`docs/dev/API-E
 1. **비회원도 방을 만들 수 있게 할지** — 진입 장벽 ↓ vs 스팸·방 관리 ↑ (현재: 회원만)
 2. **계산 실행 권한** — 방장만 vs 아무 참여자나 (현재: 방장만)
 3. **대중교통 API 선정** — ODsay vs TMAP: 한도·요금 확인 후 결정 (§6.2)
-4. **출발 시각 반영 여부** — 퇴근 시나리오는 평일 19시, 주말 시나리오는 토요일 14시 기준으로 고정할지
+4. **출발 시각 반영 여부** — 퇴근 시나리오는 평일 19시, 주말 시나리오는 토요일 14시 기준으로 고정할지. **이번 모임(`CHOSEN`) 시나리오의 기준 시각**도 정해야 한다 (방장이 약속 시각 입력 vs 평일 19시 고정)
 5. **지원 지역** — 수도권 한정으로 시작해도 되는지
 6. **서비스 이름**
 
@@ -476,7 +511,7 @@ RFC 9457 ProblemDetail + `code` 확장 필드. 상세 계약은 [`docs/dev/API-E
 |---|---|---|
 | M0 | 외부 API 키 발급, ODsay/TMAP 비교 테스트, hub 80개 데이터 정리 | 비교 결과, `hub` 시드 SQL |
 | M1 | 백엔드 골격: 회원/JWT, 방·참여·닉네임 검사, 주소 지오코딩 | API + 테스트 |
-| M2 | 추천 엔진: 후보 축소, 소요시간 조회+캐시, 점수 계산, 두 시나리오 | 추천 API, 가중치 설정 |
+| M2 | 추천 엔진: 후보 축소, 소요시간 조회+캐시, 점수 계산, 세 시나리오(각자 선택·회사·집) | 추천 API, 가중치 설정 |
 | M3 | 프론트: S1~S7 화면, 폴링 | 동작하는 MVP |
 | M4 | 주변 장소(S8), 카카오맵 표시, 공유 | MVP 완성 |
 | M5 | 실사용 테스트(친구 그룹), 가중치 튜닝, 카카오 로그인 | v1.0 |
