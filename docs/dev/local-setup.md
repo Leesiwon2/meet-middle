@@ -7,7 +7,7 @@
 
 | 도구 | 필요 버전 | 확인 명령 |
 |---|---|---|
-| JDK | 21 (Temurin) | `"$JAVA_HOME/bin/java" -version` |
+| JDK | 21 (배포판 무관) | `"$JAVA_HOME/bin/java" -version` |
 | Node.js | 24 LTS | `node -v` |
 | pnpm | 12.18.0 (corepack) | `pnpm -v` |
 | Docker Desktop | 27 이상 | `docker --version` |
