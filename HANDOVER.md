@@ -5,8 +5,9 @@
 
 ## 1. 지금 상태 (2026-11-16)
 
-- 단계: **문서화 완료, Phase 0(기초 작업) 착수 전.** 실행 가능한 코드는 아직 없다.
-- 기획·설계·개발 규약 문서는 PR #1(`docs/phase0-plan`)로 `main` 에 병합됐다 (`946a61e`).
+- 단계: **Phase 0 진행 중.** 묶음 A(P0-01~03) 완료, 묶음 B 는 P0-04 까지 완료. 진행 현황 정본은 `docs/plan/PHASE-0-기초작업.md` §5.
+- `main` 최신: PR #6 (P0-04 Spring Boot 4.1.2 골격). `./gradlew build` 와 local 프로필 health `UP`(db·redis) 확인됨.
+- 백엔드에는 임시 `SecurityConfig`(health 만 공개) 뿐이고 도메인 코드·마이그레이션은 아직 없다.
 - 저장소는 **공개**다. 회사·특정 PC·외부 프로젝트 정보를 문서나 커밋에 넣지 않는다.
 - 브랜치 보호(P0-19)는 아직 설정되지 않았다.
 
@@ -26,15 +27,20 @@
 
 ## 3. 다음 할 일 (우선순위)
 
-1. **P0-20 외부 API 키 신청을 가장 먼저** — 카카오 개발자, ODsay LAB, TMAP. 승인에 시간이 걸릴 수 있다. 사용자가 직접 해야 하는 일.
-2. **로컬 도구 준비**: 작업하는 PC 에서 `docs/dev/local-setup.md` §1 의 버전을 맞춘다. JDK 는 배포판 무관(21 이면 됨).
-3. Phase 0 묶음 A 부터: P0-01(폴더·.editorconfig·.gitattributes) → P0-02(compose) → P0-03(커밋 훅). 상세와 완료 조건은 `docs/plan/PHASE-0-기초작업.md`.
+1. **P0-05**: Flyway `V1__init.sql` (DESIGN §8 DDL). 그다음 P0-06(공통 오류 계약) → P0-07~P0-12. 상세와 완료 조건은 `docs/plan/PHASE-0-기초작업.md`.
+2. **P0-20 외부 API 키 신청** (사용자) — 카카오 개발자, ODsay LAB, TMAP. 키는 루트 `.env` 에만 넣는다. P0-21·P0-22 가 이 키를 기다린다.
+3. **프론트 도구 준비** (P0-13 전): Node 24 LTS, pnpm 12.18.0 (corepack). `docs/dev/local-setup.md` §1.
+4. 미확인: 실제 해석된 BOM 버전(Testcontainers 2.0.x 등)과 TECH-STACK 대조 → P0-25 에서.
 
 ## 4. 환경 함정
 
 - **Git 계정**: 이 저장소는 `Leesiwon2` 로 커밋한다. 클론한 PC 에서 `git config --local` 로 `user.name`/`user.email` 을 설정하고, 전역 설정은 건드리지 않는다.
   - remote: `https://Leesiwon2@github.com/Leesiwon2/meet-middle.git` — URL 에 사용자명을 넣어 Git Credential Manager 가 다른 계정 자격증명을 쓰지 않게 한다.
 - 줄 끝은 `.gitattributes`(`* text=auto eol=lf`) 로 LF 고정(P0-01). 예전 클론에서 CRLF 경고가 계속 나면 `git rm --cached -r . && git reset --hard` 로 작업 폴더를 다시 받는다(커밋 안 한 변경이 없을 때만).
+- **JDK**: 기본 `java` 가 21 이 아닌 PC 에서는 Gradle 명령마다 `JAVA_HOME="<JDK 21 경로>" ./gradlew …` 로 지정한다(전역 설정은 바꾸지 않는다).
+- **Docker 필요**: compose(로컬 DB·Redis)와 `./gradlew build`(Testcontainers) 모두 Docker Desktop 이 떠 있어야 한다.
+- **커밋 훅**: 클론마다 `git config core.hooksPath .githooks`. gitleaks 가 없으면 pre-commit 비밀 탐지는 건너뛴다.
+- **PR 병합은 Squash merge** (CONVENTION §3). PR #2~#6 은 Merge commit 으로 들어갔다 — 저장소 설정에서 Squash 만 허용하는 것을 권장.
 - 포트는 기본 포트와 충돌하지 않게 15432·16379·18080·15173 을 쓴다.
 - 한글 파일명을 git 명령으로 다룰 때 `-c core.quotepath=false`.
 
