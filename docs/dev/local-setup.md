@@ -34,8 +34,11 @@ corepack enable
 ## 3. 기동 순서
 
 ```bash
-# 1) DB · Redis
-docker compose -f infra/compose.yaml --env-file .env up -d
+# 1) DB · Redis (healthy 가 될 때까지 대기)
+docker compose -f infra/compose.yaml --env-file .env up -d --wait
+#    확인: docker compose -f infra/compose.yaml --env-file .env exec postgres pg_isready
+#          docker compose -f infra/compose.yaml --env-file .env exec redis redis-cli ping   → PONG
+#    중지: ... down  (데이터 유지) / ... down -v  (볼륨까지 삭제 = DB 초기화)
 
 # 2) 백엔드 (Flyway 가 기동 시 마이그레이션 적용)
 cd backend && ./gradlew bootRun --args='--spring.profiles.active=local'
@@ -56,11 +59,13 @@ cd frontend && pnpm install --frozen-lockfile && pnpm gen:api && pnpm dev
 |---|---|---|---|
 | `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` | ✓ | PostgreSQL | 기동 실패 |
 | `REDIS_PORT` | ✓ | Redis | 기동 실패 |
+| `BACKEND_PORT`, `FRONTEND_PORT` | ✓ | 백엔드·프론트 포트 (CORS 허용 출처, Vite 프록시) | 기동 실패 |
 | `JWT_SECRET` | ✓ | JWT 서명 (32바이트 이상 랜덤) | 기동 실패 (기본값 두지 않음) |
 | `KAKAO_REST_API_KEY` | | 주소→좌표, 주변 장소 | `local` 프로필에서 Fake 사용 |
 | `KAKAO_JS_KEY` | | 프론트 지도 (`VITE_KAKAO_JS_KEY`) | 지도 대신 목록만 표시 |
 | `ODSAY_API_KEY` / `TMAP_APP_KEY` | | 대중교통 소요시간 (ADR-002 확정 후 하나) | Fake(직선거리 추정) 사용 |
 
+- `.env.example` 의 DB 비밀번호는 로컬 전용 값이다. compose 는 `127.0.0.1` 에만 포트를 연다.
 - 비밀값을 대화창, 이슈, PR, 로그에 붙여넣지 않는다.
 - 키가 노출되면 즉시 콘솔에서 재발급하고 `.env` 를 교체한다.
 

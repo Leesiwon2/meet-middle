@@ -89,7 +89,7 @@
 | CI | GitHub Actions | `actions/checkout@v7`, `actions/setup-java@v6`, `actions/setup-node@v7`, `pnpm/action-setup@v6`, `gradle/actions@v6` |
 | 비밀 탐지 | gitleaks **8.30.1** | CI + (선택) 로컬 pre-commit |
 | 주소→좌표, 주변 장소 | 카카오 로컬 REST API | |
-| 대중교통 소요시간 | ODsay LAB (1순위) / TMAP (대안) | **미확정**: [ADR-002](../decisions/adr/ADR-002-대중교통API선정.md), P0-14 PoC 후 확정 |
+| 대중교통 소요시간 | ODsay LAB (1순위) / TMAP (대안) | **미확정**: [ADR-002](../decisions/adr/ADR-002-대중교통API선정.md), P0-21 PoC 후 확정 |
 | 배포 대상 | 미정 | Phase 1 이후 결정 (후보: 단일 VM + Docker Compose, 또는 관리형 PaaS) |
 
 ## 6. 버전 확인 명령 (갱신 시 재사용)
