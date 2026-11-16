@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# 커밋 전 비밀 탐지. gitleaks 가 설치돼 있으면 staged 변경만 검사한다.
+# 버전: docs/dev/TECH-STACK.md §5 · 배선: git config core.hooksPath .githooks
+set -euo pipefail
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "ℹ gitleaks 가 없어 비밀 탐지를 건너뛴다 (CI 에서는 검사한다). 설치: docs/dev/local-setup.md §1" >&2
+  exit 0
+fi
+
+if ! gitleaks git --pre-commit --staged --redact --no-banner; then
+  echo "✗ 비밀값으로 보이는 내용이 staged 변경에 있다. 제거하고 .env 로 옮긴다 (CLAUDE.md §3)." >&2
+  exit 1
+fi

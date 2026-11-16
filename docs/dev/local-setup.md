@@ -11,7 +11,8 @@
 | Node.js | 24 LTS | `node -v` |
 | pnpm | 12.18.0 (corepack) | `pnpm -v` |
 | Docker Desktop | 27 이상 | `docker --version` |
-| Git | 2.40 이상 | `git --version` |
+| Git | 2.40 이상 (Windows 는 Git Bash 포함 — 훅이 bash 로 돈다) | `git --version` |
+| gitleaks | 8.30.1 (선택) | `gitleaks version` — 없으면 pre-commit 비밀 탐지를 건너뛰고 CI 에서만 검사 |
 
 ### ⚠️ 주의
 - 기본 `java` 가 21 이 아니면(여러 JDK 를 함께 쓰는 PC 등) Gradle 이 엉뚱한 JDK 로 돈다.
@@ -30,6 +31,13 @@ git config commit.template .gitmessage    # 커밋 양식 자동 표시
 cp .env.example .env                      # 키 값 채우기 (§4)
 corepack enable
 ```
+
+배선 확인: `git config core.hooksPath` → `.githooks`. 훅이 검사하는 것:
+
+| 훅 | 검사 | 실패 시 |
+|---|---|---|
+| `commit-msg` | `type(scope): 제목` 형식, type·scope 목록, 제목 72자 이내, 끝 마침표 금지 ([CONVENTION](../CONVENTION.md) §1). merge·revert·fixup 메시지는 통과 | 커밋 거부 + 위반 사유 출력 |
+| `pre-commit` | gitleaks 로 staged 변경의 비밀값 탐지 (설치돼 있을 때만) | 커밋 거부 |
 
 ## 3. 기동 순서
 
