@@ -1,0 +1,5 @@
+# 테스트: DB·Redis 접속 정보는 Testcontainers @ServiceConnection 이 주입한다 (TestcontainersConfiguration).
+management:
+  endpoint:
+    health:
+      show-components: always

@@ -33,6 +33,7 @@
 | 항목 | 버전 | 용도 |
 |---|---|---|
 | Spring Boot | **4.1.2** | 애플리케이션 프레임워크 (Spring Framework 7 계열). ⚠️ 4.1 오픈소스 지원 종료 **2027-07-31** → 그 전에 다음 마이너로 업그레이드 (ADR-001) |
+| io.spring.dependency-management (Gradle 플러그인) | **1.1.7** | BOM 버전 관리. start.spring.io 4.1.2 생성값 |
 | Spring Web MVC | BOM | REST API (가상 스레드 사용: `spring.threads.virtual.enabled=true`) |
 | Spring Security | BOM | 회원 JWT 쿠키, 비회원 참여 토큰, CSRF |
 | Spring Data JPA / Hibernate | BOM | 영속성. 단순 CRUD 도메인이라 JPA 채택 (ADR-001 §5) |
