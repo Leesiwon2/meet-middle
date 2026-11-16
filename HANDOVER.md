@@ -34,7 +34,7 @@
 
 - **Git 계정**: 이 저장소는 `Leesiwon2` 로 커밋한다. 클론한 PC 에서 `git config --local` 로 `user.name`/`user.email` 을 설정하고, 전역 설정은 건드리지 않는다.
   - remote: `https://Leesiwon2@github.com/Leesiwon2/meet-middle.git` — URL 에 사용자명을 넣어 Git Credential Manager 가 다른 계정 자격증명을 쓰지 않게 한다.
-- 커밋할 때 `LF will be replaced by CRLF` 경고가 난다 — `.gitattributes` 가 아직 없어서다. P0-01 에서 `* text=auto eol=lf` 로 해결 예정.
+- 줄 끝은 `.gitattributes`(`* text=auto eol=lf`) 로 LF 고정(P0-01). 예전 클론에서 CRLF 경고가 계속 나면 `git rm --cached -r . && git reset --hard` 로 작업 폴더를 다시 받는다(커밋 안 한 변경이 없을 때만).
 - 포트는 기본 포트와 충돌하지 않게 15432·16379·18080·15173 을 쓴다.
 - 한글 파일명을 git 명령으로 다룰 때 `-c core.quotepath=false`.
 
