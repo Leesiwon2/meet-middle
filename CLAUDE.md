@@ -33,7 +33,7 @@
 
 - 서비스: 링크를 공유받은 친구들이 집·회사 주소를 입력하면 대중교통 기준으로 가장 공평한 만남 장소와 주변 맛집·술집을 추천.
 - 스택: Java 21 · Spring Boot 4.1 · JPA · PostgreSQL 18 · Redis 8 / React 19 · TypeScript 6 strict · Vite 8 · TanStack Query · Tailwind 4 · pnpm. 정확한 버전은 TECH-STACK.
-- 단계: **Phase 0 (기초 작업)** 진행 전.
+- 단계: **Phase 0 (기초 작업)** 진행 중 — 현황은 `HANDOVER.md`.
 
 ## 3. 절대 규칙
 
