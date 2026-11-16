@@ -1,11 +1,43 @@
-node_modules/
-dist/
-build/
-.gradle/
-.idea/
-*.iml
+# --- 비밀 (절대 커밋 금지) ---
 .env
 .env.*
 !.env.example
 application-local.yml
+*.pem
+*.key
+
+# --- 백엔드 (Gradle) ---
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+out/
+bin/
+
+# --- 프론트 (Node / Vite) ---
+node_modules/
+dist/
+dist-ssr/
+*.local
+.vite/
+coverage/
+# orval 생성물 — git 에 넣지 않는다 (pnpm gen:api 로 생성)
+frontend/src/api/generated/
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+
+# --- 로그 ---
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# --- IDE / OS ---
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
 .DS_Store
+Thumbs.db
+desktop.ini

@@ -1,0 +1,23 @@
+# 정본: docs/plan/PHASE-0-기초작업.md P0-01
+# 텍스트는 저장소·작업 폴더 모두 LF. Windows 전용 스크립트만 CRLF.
+* text=auto eol=lf
+
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+
+# 실행 스크립트 (git hook, gradlew 등)
+*.sh   text eol=lf
+gradlew text eol=lf
+
+# 바이너리
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.jar  binary
+*.zip  binary
+*.pdf  binary

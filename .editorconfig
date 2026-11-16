@@ -1,0 +1,29 @@
+# 정본: docs/plan/PHASE-0-기초작업.md P0-01
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+# google-java-format (Spotless, P0-17) 기준
+[*.java]
+indent_size = 2
+max_line_length = 100
+
+# Gradle Kotlin DSL 은 Kotlin 관례
+[*.{kt,kts}]
+indent_size = 4
+
+# Markdown 줄 끝 공백 2칸은 줄바꿈 의미가 있어 유지
+[*.md]
+trim_trailing_whitespace = false
+
+[Makefile]
+indent_style = tab
+
+[*.{bat,cmd}]
+end_of_line = crlf
