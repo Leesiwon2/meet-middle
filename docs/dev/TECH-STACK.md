@@ -111,3 +111,4 @@ curl -s https://nodejs.org/dist/index.json | grep -o '"version":"[^"]*"[^}]*"lts
 |---|---|---|
 | 2026-11-11 | 최초 고정 | ADR-001 |
 | 2026-11-11 | 지원 종료일 추적 표 추가 (Spring Boot 3.5 종료 확인, 4.1 종료일 명시) | ADR-001 |
+| 2026-11-16 | JDK 배포판 지정 해제 (Temurin → 배포판 무관, toolchain 은 버전만) | 사용자 결정 |
