@@ -22,7 +22,7 @@
 
 | 항목 | 버전 | 비고 |
 |---|---|---|
-| JDK | **21 LTS** (Eclipse Temurin) | Gradle toolchain 으로 고정. 기본 `java` 가 21 이 아니면 → [local-setup](local-setup.md) §1 |
+| JDK | **21 LTS** (배포판 무관) | Gradle toolchain 으로 고정(버전만, 벤더 지정 안 함). 운영 이미지 배포판은 배포 ADR 에서 정한다. 기본 `java` 가 21 이 아니면 → [local-setup](local-setup.md) §1 |
 | Gradle | **9.9.1** (Wrapper) | `gradlew` 만 사용. 로컬 설치 Gradle 사용 금지 |
 | Node.js | **24 LTS** (24.22.x, "Krypton") | `.nvmrc` 로 고정 |
 | pnpm | **12.18.0** | `package.json` 의 `packageManager` 필드로 고정, corepack 사용 |
