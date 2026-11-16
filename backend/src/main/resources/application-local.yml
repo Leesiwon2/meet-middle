@@ -1,0 +1,20 @@
+# 로컬 개발: infra/compose.yaml 의 PostgreSQL·Redis 에 붙는다.
+# 실행: ./gradlew bootRun --args='--spring.profiles.active=local'
+server:
+  port: ${BACKEND_PORT}
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:${DB_PORT}/${DB_NAME}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  data:
+    redis:
+      host: localhost
+      port: ${REDIS_PORT}
+
+management:
+  endpoint:
+    health:
+      # 로컬에서만 db·redis 구성요소 상태를 보여 준다 (상세 정보는 숨김)
+      show-components: always

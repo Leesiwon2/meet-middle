@@ -49,8 +49,12 @@ docker compose -f infra/compose.yaml --env-file .env up -d --wait
 #    중지: ... down  (데이터 유지) / ... down -v  (볼륨까지 삭제 = DB 초기화)
 
 # 2) 백엔드 (Flyway 가 기동 시 마이그레이션 적용)
+#    기본 java 가 21 이 아니면 앞에 JAVA_HOME="<JDK 21 경로>" 를 붙인다 (§1 주의)
+#    포트·DB 계정은 루트 .env 를 Spring 이 직접 읽는다 (application.yml 의 spring.config.import)
 cd backend && ./gradlew bootRun --args='--spring.profiles.active=local'
-#    확인: curl http://localhost:18080/actuator/health  → {"status":"UP"}
+#    확인: curl http://localhost:18080/actuator/health
+#          → {"status":"UP", "components":{"db":{"status":"UP"}, "redis":{"status":"UP"}, …}}
+#    빌드·테스트: ./gradlew build  (테스트는 Testcontainers 로 PG·Redis 를 따로 띄운다 → Docker 실행 필요)
 
 # 3) 프론트 (API 코드 생성 → 개발 서버)
 cd frontend && pnpm install --frozen-lockfile && pnpm gen:api && pnpm dev
