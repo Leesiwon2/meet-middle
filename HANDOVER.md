@@ -1,13 +1,12 @@
 # HANDOVER — 세션 인계
 
-> 상태: 활성 / 2026-11-11 작성, 2026-11-16 갱신
+> 상태: 활성 / 2026-11-11 작성, 2026-11-17 갱신
 > 역할: 새 세션이 **지금 어디까지 왔고 다음에 무엇을 하는지** 바로 알게 하는 문서. 규칙은 `CLAUDE.md`, 문서 목록은 `docs/00_INDEX.md` 가 정본이다. 단계가 바뀌면 이 문서를 고친다.
 
-## 1. 지금 상태 (2026-11-16)
+## 1. 지금 상태 (2026-11-17)
 
-- 단계: **Phase 0 진행 중.** 묶음 A(P0-01~03) 완료, 묶음 B 는 P0-04 까지 완료. 진행 현황 정본은 `docs/plan/PHASE-0-기초작업.md` §5.
-- `main` 최신: PR #6 (P0-04 Spring Boot 4.1.2 골격). `./gradlew build` 와 local 프로필 health `UP`(db·redis) 확인됨.
-- 백엔드에는 임시 `SecurityConfig`(health 만 공개) 뿐이고 도메인 코드·마이그레이션은 아직 없다.
+- 단계: **Phase 0 진행 중.** 묶음 A(P0-01~03) 완료, 묶음 B 는 P0-05 까지 완료. 진행 현황 정본은 `docs/plan/PHASE-0-기초작업.md` §5.
+- 백엔드: Spring Boot 4.1.2 골격 + Flyway `V1__init.sql`(member·hub·room·participant·recommendation). 임시 `SecurityConfig`(health 만 공개). 도메인 코드(엔티티·API)는 아직 없다.
 - 저장소는 **공개**다. 회사·특정 PC·외부 프로젝트 정보를 문서나 커밋에 넣지 않는다.
 - 브랜치 보호(P0-19)는 아직 설정되지 않았다.
 
@@ -23,11 +22,12 @@
 | 버전 | 2026-11-11 레지스트리 조회 기준 고정 | TECH-STACK |
 | Spring Boot | 3.5 는 2026-06-30 OSS 지원 종료(사용자 제보 → endoflife.date 로 확인). 4.1 채택, 4.1 종료 2027-07-31 | ADR-001, TECH-STACK §1 |
 | JDK 배포판 | **무관.** toolchain 은 버전(21)만 고정, 벤더 지정 안 함. 운영 이미지 배포판은 배포 ADR 에서 결정 (2026-11-16) | TECH-STACK §2 |
+| 회원 탈퇴 | **행 익명화.** member 행은 남기고 email·비밀번호·주소·좌표를 NULL 로, `deleted_at` 기록. 참여 기록·방장 FK 유지 (사용자 선택, 2026-11-17) | db/README §3, V1 |
 | 문서 체계 | 진입점 CLAUDE.md → 정본 문서 연결, ADR, 상태 표기 | CLAUDE.md |
 
 ## 3. 다음 할 일 (우선순위)
 
-1. **P0-05**: Flyway `V1__init.sql` (DESIGN §8 DDL). 그다음 P0-06(공통 오류 계약) → P0-07~P0-12. 상세와 완료 조건은 `docs/plan/PHASE-0-기초작업.md`.
+1. **P0-06**: 공통 오류 계약(ErrorCode, ProblemDetail). 그다음 P0-07~P0-12. 상세와 완료 조건은 `docs/plan/PHASE-0-기초작업.md`.
 2. **P0-20 외부 API 키 신청** (사용자) — 카카오 개발자, ODsay LAB, TMAP. 키는 루트 `.env` 에만 넣는다. P0-21·P0-22 가 이 키를 기다린다.
 3. **프론트 도구 준비** (P0-13 전): Node 24 LTS, pnpm 12.18.0 (corepack). `docs/dev/local-setup.md` §1.
 4. 미확인: 실제 해석된 BOM 버전(Testcontainers 2.0.x 등)과 TECH-STACK 대조 → P0-25 에서.
@@ -40,7 +40,7 @@
 - **JDK**: 기본 `java` 가 21 이 아닌 PC 에서는 Gradle 명령마다 `JAVA_HOME="<JDK 21 경로>" ./gradlew …` 로 지정한다(전역 설정은 바꾸지 않는다).
 - **Docker 필요**: compose(로컬 DB·Redis)와 `./gradlew build`(Testcontainers) 모두 Docker Desktop 이 떠 있어야 한다.
 - **커밋 훅**: 클론마다 `git config core.hooksPath .githooks`. gitleaks 가 없으면 pre-commit 비밀 탐지는 건너뛴다.
-- **PR 병합은 Squash merge** (CONVENTION §3). PR #2~#6 은 Merge commit 으로 들어갔다 — 저장소 설정에서 Squash 만 허용하는 것을 권장.
+- **PR 병합은 Squash merge** (CONVENTION §3). PR #2~#6 은 Merge commit 으로 들어갔다 — 저장소 설정에서 Squash 만 허용하는 것을 권장. 병합 후 원격 작업 브랜치 삭제(CONVENTION §2).
 - 포트는 기본 포트와 충돌하지 않게 15432·16379·18080·15173 을 쓴다.
 - 한글 파일명을 git 명령으로 다룰 때 `-c core.quotepath=false`.
 

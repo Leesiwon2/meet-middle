@@ -297,6 +297,8 @@
 
 ## 8. 데이터 모델 (PostgreSQL)
 
+> 아래는 초안이다. **정본은 `backend/src/main/resources/db/migration/V1__init.sql`** (P0-05). V1 에서 달라진 점: 제약 이름을 [db/README](../db/README.md) 규칙으로 통일(`ck_participant_identity` 등), `member`·`room`·`hub` 에 `updated_at`, `member.deleted_at`(탈퇴 = 익명화, email NULL 허용), `room.confirmed_hub_id` FK, enum 성격 값·rank·hub_weight CHECK, `hub.name`·`participant.guest_token_hash` 유니크, FK·만료 인덱스.
+
 ```sql
 CREATE TABLE member (
   id             BIGSERIAL PRIMARY KEY,

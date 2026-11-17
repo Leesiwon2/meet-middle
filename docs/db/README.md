@@ -30,7 +30,7 @@
 - 좌표는 `DOUBLE PRECISION` (위도 `lat`, 경도 `lng`). 공간 연산이 필요해지면 PostGIS 도입을 ADR 로 결정.
 - 삭제
   - 방 만료 후 30일: participant 의 주소·좌표 컬럼 `NULL` 처리 (배치). 행 자체는 통계용으로 남김.
-  - 회원 탈퇴: member 의 주소 즉시 삭제, 참여 기록은 닉네임만 남기고 `member_id` 연결 해제.
+  - 회원 탈퇴 = **행 익명화**: member 행은 남기고 `email`·`password_hash`·주소·좌표를 `NULL` 로, `deleted_at` 기록. 참여 기록(participant)과 방장(room.host_member_id) FK 는 유지된다. DB 제약 `ck_member_withdrawn_anonymized` 가 익명화를 강제한다. (2026-11-17 결정 — 행 삭제 시 `ck_participant_identity`·`room.host_member_id NOT NULL` 과 충돌)
 - 비밀번호는 BCrypt 해시만, 비회원 토큰은 SHA-256 해시만 저장.
 
 ## 4. 접근
